@@ -17,6 +17,7 @@ class _SignUpFormState extends State<SignUpForm> {
   String _city;
   String _cityCode;
   String _address;
+  final TextEditingController _pwdController = new TextEditingController();
 
   final GlobalKey<FormState> _SignUpFormGlobalKey = GlobalKey<FormState>();
 
@@ -32,7 +33,9 @@ class _SignUpFormState extends State<SignUpForm> {
                   child: Column(
                     children: <Widget>[
                       TextFormField(
-                        validator: (input){ return emailValidator(input);},
+                        validator: (input) {
+                          return _emailValidator(input);
+                        },
                         onSaved: (input) => _email = input,
                         decoration: InputDecoration(
                           icon: Icon(Icons.mail),
@@ -41,10 +44,14 @@ class _SignUpFormState extends State<SignUpForm> {
                         keyboardType: TextInputType.emailAddress,
                       ),
                       TextFormField(
+                        controller: _pwdController,
                         onSaved: (input) => _password = input,
                         decoration: InputDecoration(
                             icon: Icon(Icons.lock), labelText: "Password"),
                         obscureText: true,
+                        validator: (input) {
+                          return _notEmptyValidator(input);
+                        },
                       ),
                       TextFormField(
                         onSaved: (input) => _repeatPassword = input,
@@ -53,9 +60,11 @@ class _SignUpFormState extends State<SignUpForm> {
                             labelText: "Repeat Password"),
                         obscureText: true,
                         validator: (input) {
-                          if (input != _password) {
+                          print(_pwdController.value.text);
+                          if (input != _pwdController.value.text) {
                             return "Les mots de passe ne correspondent pas !";
                           }
+                          return null;
                         },
                       ),
                       TextFormField(
@@ -63,21 +72,25 @@ class _SignUpFormState extends State<SignUpForm> {
                         decoration: InputDecoration(
                             icon: Icon(Icons.face), labelText: "Name"),
                         validator: (input) {
-                          if (input.isEmpty) {
-                            return "Ce champ ne doit pas être vide !";
-                          }
+                          return _notEmptyValidator(input);
                         },
                       ),
                       TextFormField(
                         onSaved: (input) => _surname = input,
                         decoration: InputDecoration(
                             icon: Icon(Icons.face), labelText: "Surname"),
+                        validator: (input) {
+                          return _notEmptyValidator(input);
+                        },
                       ),
                       TextFormField(
                         onSaved: (input) => _birthDate = input,
                         decoration: InputDecoration(
                             icon: Icon(Icons.cake), labelText: "Birthdate"),
                         keyboardType: TextInputType.datetime,
+                        validator: (input) {
+                          return _bdateValidator(input);
+                        },
                       ),
                       TextFormField(
                         onSaved: (input) => _address = input,
@@ -85,9 +98,7 @@ class _SignUpFormState extends State<SignUpForm> {
                             icon: Icon(Icons.place), labelText: "Address"),
                         keyboardType: TextInputType.text,
                         validator: (input) {
-                          if (input.isEmpty) {
-                            return "Ce champ ne doit pas être vide !";
-                          }
+                          return _notEmptyValidator(input);
                         },
                       ),
                       TextFormField(
@@ -95,6 +106,9 @@ class _SignUpFormState extends State<SignUpForm> {
                         decoration: InputDecoration(
                             icon: Icon(Icons.place), labelText: "City"),
                         keyboardType: TextInputType.datetime,
+                        validator: (input) {
+                          return _notEmptyValidator(input);
+                        },
                       ),
                       TextFormField(
                         onSaved: (input) => _cityCode = input,
@@ -102,9 +116,7 @@ class _SignUpFormState extends State<SignUpForm> {
                             icon: Icon(Icons.place), labelText: "City Code"),
                         keyboardType: TextInputType.number,
                         validator: (input) {
-                          if (input.isEmpty) {
-                            return "Ce champ ne doit pas être vide !";
-                          }
+                          return _zipValidator(input);
                         },
                       ),
                       RaisedButton(
@@ -121,17 +133,46 @@ class _SignUpFormState extends State<SignUpForm> {
   }
 
   void _signUp() {
-    if(_SignUpFormGlobalKey.currentState.validate()){
+    if (_SignUpFormGlobalKey.currentState.validate()) {
       _SignUpFormGlobalKey.currentState.save();
     }
   }
 
-  String emailValidator(input){
-    final String pattern = r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?)*$";
+  String _emailValidator(input) {
+    final String pattern =
+        r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?)*$";
     final RegExp regExp = new RegExp(pattern);
 
-    if(regExp.hasMatch(input)){
-      return null;
+    if (!regExp.hasMatch(input)) {
+      return "Email invalide !";
+    }
+    return null;
+  }
+
+  String _zipValidator(input) {
+    final String pattern = r"^(([0-8][0-9])|(9[0-8])|(2[ab]))[0-9]{3}$";
+    final RegExp regExp = new RegExp(pattern);
+
+    if (!regExp.hasMatch(input)) {
+      return "Code postal invalide !";
+    }
+    return null;
+  }
+
+  String _bdateValidator(input) {
+    final String pattern =
+        r"^(0?[1-9]|[12][0-9]|3[01])[\/](0?[1-9]|1[012])[\/\-]\d{4}$";
+    final RegExp regExp = new RegExp(pattern);
+
+    if (!regExp.hasMatch(input)) {
+      return "Date de naissance invalide !";
+    }
+    return null;
+  }
+
+  String _notEmptyValidator(String input) {
+    if (input.isEmpty) {
+      return "Ce champ est obligatoire";
     }
     return null;
   }
