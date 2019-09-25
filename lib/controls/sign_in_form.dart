@@ -17,40 +17,40 @@ class _SignInFormState extends State<SignInForm> {
   @override
   Widget build(BuildContext context) {
     return Card(
-        child: Container( 
-          padding: EdgeInsets.all(15),
+        child: Container(
+            padding: EdgeInsets.all(15),
             child: Form(
-      key: _SignInFormGlobalKey,
-      child: Column(
-        children: <Widget>[
-          TextFormField(
-            validator: (input) {
-              if (!input.contains('@')) {
-                return 'Format de l\'adresse mail incorrect';
-              }
-            },
-            onSaved: (input) => _email = input,
-            decoration: InputDecoration(
-              icon: Icon(Icons.mail),
-              labelText: "Mail",
-            ),
-          ),
-          TextFormField(
-            onSaved: (input) => _password = input,
-            decoration:
-                InputDecoration(icon: Icon(Icons.lock), labelText: "Password"),
-            obscureText: true,
-          ),
-          RaisedButton(
-            child: Text('Sign In'),
-            onPressed: _signIn,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(10))),
-            color: Theme.of(context).primaryColor,
-          )
-        ],
-      ),
-    )));
+              key: _SignInFormGlobalKey,
+              child: Column(
+                children: <Widget>[
+                  TextFormField(
+                    validator: (input) {
+                      if (!input.contains('@')) {
+                        return 'Format de l\'adresse mail incorrect';
+                      }
+                    },
+                    onSaved: (input) => _email = input,
+                    decoration: InputDecoration(
+                      icon: Icon(Icons.mail),
+                      labelText: "Mail",
+                    ),
+                  ),
+                  TextFormField(
+                    onSaved: (input) => _password = input,
+                    decoration: InputDecoration(
+                        icon: Icon(Icons.lock), labelText: "Password"),
+                    obscureText: true,
+                  ),
+                  RaisedButton(
+                    child: Text('Sign In'),
+                    onPressed: _signIn,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(10))),
+                    color: Theme.of(context).primaryColor,
+                  )
+                ],
+              ),
+            )));
   }
 
   Future<void> _signIn() async {
@@ -62,8 +62,13 @@ class _SignInFormState extends State<SignInForm> {
       try {
         await FirebaseAuth.instance.signInWithEmailAndPassword(
             email: _email.trim(), password: _password.trim());
-        Navigator.push(
-            context, MaterialPageRoute(builder: (context) => MainPage()));
+
+        FirebaseAuth.instance.currentUser().then((usr) => usr.getIdToken().then(
+            (fbToken) => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        MainPage(token: fbToken.token)))));
       } catch (e) {
         print(e.message);
       }
