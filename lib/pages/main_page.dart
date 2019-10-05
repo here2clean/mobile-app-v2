@@ -4,8 +4,8 @@ import 'package:here_to_clean_v2/controls/main_drawer.dart';
 import 'package:here_to_clean_v2/controls/map_view.dart';
 
 class MainPage extends StatelessWidget {
-
   final String token;
+
   MainPage({this.token});
 
   @override
@@ -14,7 +14,9 @@ class MainPage extends StatelessWidget {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        drawer: MainDrawer(),
+          drawer: MainDrawer(
+            token: token,
+          ),
           appBar: AppBar(
             title: Text('Here to Clean'),
             bottom: TabBar(
@@ -30,10 +32,10 @@ class MainPage extends StatelessWidget {
               ],
             ),
           ),
-          body: TabBarView(children: [
-            MapView(token: token),
-            EventListView(token: token)
-          ])),
+          body: TabBarView(
+            children: [MapView(token: token), EventListView(token: token)],
+            physics: NeverScrollableScrollPhysics(),
+          )),
     );
   }
 }

@@ -6,9 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:here_to_clean_v2/controls/event_list.dart';
 import 'package:here_to_clean_v2/httpClients/H2CHttpClient.dart';
 import 'package:here_to_clean_v2/model/Event.dart';
-import 'package:http/http.dart' as http;
-
-
+import 'package:here_to_clean_v2/constants/h2c_api_routes.dart';
 
 
 class EventListView extends StatefulWidget {
@@ -30,7 +28,7 @@ class _EventListViewState extends State<EventListView> {
 
   Future<List<Event>> fetchEvents(H2CHttpClient client) async {
     final response =
-        await client.get('http://heretoclean.cambar.re/api/event/all');
+    await client.get(H2CApiRoutes.getAllEvents);
 
     if (response.statusCode == 200) {
       return compute(parseEvents, response.body);
@@ -40,25 +38,36 @@ class _EventListViewState extends State<EventListView> {
   }
 
   static List<Event> parseEvents(String responseBody) {
+    log(responseBody);
     final parsed = json.decode(responseBody).cast<Map<String, dynamic>>();
     return parsed.map<Event>((json) => Event.fromJson(json)).toList();
   }
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     return Scaffold(
-      body: Padding(
-        child: FutureBuilder<List<Event>>(
-          future: fetchEvents(H2CHttpClient(token: token)),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              return EventList(events: snapshot.data );
-            }
-            return Center(child: CircularProgressIndicator());
-          },
-        ),
-        padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
-      ),
+        body: Container(
+            decoration: BoxDecoration(
+                gradient: LinearGradient(
+                    begin: Alignment.topRight,
+                    end: Alignment.bottomCenter,
+                    colors: [Colors.green, Colors.white]
+                )
+            ),
+            child: Padding(
+              child: FutureBuilder<List<Event>>(
+                future: fetchEvents(H2CHttpClient(token: token)),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return EventList(events: snapshot.data);
+                  }
+                  return Center(child: CircularProgressIndicator());
+                },
+              ),
+              padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
+            ),
+        )
     );
     ;
   }

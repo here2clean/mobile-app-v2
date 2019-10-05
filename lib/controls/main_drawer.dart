@@ -1,16 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:here_to_clean_v2/controls/association_list_view.dart';
+import 'package:here_to_clean_v2/pages/associations_page.dart';
 
 import 'package:here_to_clean_v2/pages/cgu_page.dart';
 
 class MainDrawer extends StatefulWidget {
+  final String token;
+
+  MainDrawer({this.token});
+
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
-    return _MainDrawerState();
+    return _MainDrawerState(token: token);
   }
 }
 
 class _MainDrawerState extends State<MainDrawer> {
+  final String token;
+
+  _MainDrawerState({this.token});
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -27,7 +37,12 @@ class _MainDrawerState extends State<MainDrawer> {
           ),
           ListTile(
             title: Text("Les associations"),
-            onTap: () => {},
+            onTap: () => {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => AssociationPage(token: token)))
+            },
           ),
           ListTile(
             title: Text("Mon profil"),
@@ -36,10 +51,10 @@ class _MainDrawerState extends State<MainDrawer> {
           ListTile(
             title: Text("CGU"),
             onTap: () => {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => CGUPage()))
+              Navigator.push(
+                  context, MaterialPageRoute(builder: (context) => CGUPage()))
             },
           ),
-
         ],
       ),
     );

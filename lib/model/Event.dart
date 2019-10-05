@@ -1,3 +1,4 @@
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:here_to_clean_v2/model/volunteer.dart';
 
 import 'Association.dart';
@@ -10,6 +11,7 @@ class Event{
   String description;
   String location;
   String urlImage;
+  LatLng latLngLocation;
 
   List<Volunteer> volunteers;
   Association association;
@@ -24,7 +26,12 @@ class Event{
       endDate: DateTime.parse(json['endDate']),
       description: json["description"],
       location: json["location"],
-      urlImage: json["urlImage"]
+      urlImage: json["urlImage"],
     );
+  }
+
+  @override
+  String toString() {
+    return 'Event{id: $id, name: $name, beginDate: $beginDate, endDate: $endDate, description: $description, location: $location, urlImage: $urlImage, volunteers: $volunteers, association: $association}';
   }
 }
