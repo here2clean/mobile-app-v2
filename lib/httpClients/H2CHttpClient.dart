@@ -11,7 +11,7 @@ class H2CHttpClient extends http.BaseClient{
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) {
     request.headers['Authorization'] = 'Bearer '+ token;
-    log("XXX ->"+ request.headers['Authorization']);
+    log(request.headers['Authorization']);
     return _inner.send(request);
   }
 }

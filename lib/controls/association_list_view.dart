@@ -53,7 +53,7 @@ class _AssociationListView extends State<AssociationListView> {
           future: fetchAssociations(H2CHttpClient(token: token)),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
-              return AssociationList(associations: snapshot.data );
+              return AssociationList(associations: snapshot.data, token: token );
             }
             return Center(child: CircularProgressIndicator());
           },

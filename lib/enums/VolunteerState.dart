@@ -1,0 +1,4 @@
+enum VolunteerState {
+  unenrolled,
+  enrolled,
+}

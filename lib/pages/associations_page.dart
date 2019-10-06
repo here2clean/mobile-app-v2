@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:here_to_clean_v2/controls/association_list_view.dart';
 
-class AssociationPage extends StatelessWidget{
+class AssociationsPage extends StatelessWidget{
 
   final String token;
-  AssociationPage({this.token});
+  AssociationsPage({this.token});
 
 
   @override
@@ -21,4 +21,3 @@ class AssociationPage extends StatelessWidget{
 
 
 }
-

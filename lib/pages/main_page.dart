@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:here_to_clean_v2/controls/event_list_view.dart';
 import 'package:here_to_clean_v2/controls/main_drawer.dart';
 import 'package:here_to_clean_v2/controls/map_view.dart';
+import 'package:here_to_clean_v2/model/volunteer.dart';
 
 class MainPage extends StatelessWidget {
   final String token;
+  final Volunteer volunteer;
 
-  MainPage({this.token});
+  MainPage({this.token, this.volunteer});
 
   @override
   Widget build(BuildContext context) {

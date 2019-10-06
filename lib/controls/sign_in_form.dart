@@ -1,5 +1,13 @@
+import 'dart:convert';
+import 'dart:core' as prefix0;
+import 'dart:core';
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:here_to_clean_v2/constants/h2c_api_routes.dart';
+import 'package:here_to_clean_v2/httpClients/H2CHttpClient.dart';
+import 'package:here_to_clean_v2/model/volunteer.dart';
 import 'package:here_to_clean_v2/pages/main_page.dart';
 
 class SignInForm extends StatefulWidget {
@@ -52,6 +60,19 @@ class _SignInFormState extends State<SignInForm> {
               ),
             )));
   }
+  Future<Volunteer> _getUserByMail(H2CHttpClient client, String mail) async{
+    var queryParameters = {
+      'email': mail,
+    };
+
+    Uri addAVolunteerToAnEvent = Uri.http(H2CApiRoutes.HereToClean,
+        H2CApiRoutes.getVolunteerByMail, queryParameters);
+    var response = await client.get(addAVolunteerToAnEvent);
+    if (response.statusCode == 200){
+      final parsed = json.decode(response.body).cast<Map<String, dynamic>>();
+      return Volunteer.fromJson(parsed);
+    }
+  }
 
   Future<void> _signIn() async {
     final FormState formState = _SignInFormGlobalKey.currentState;
@@ -63,12 +84,16 @@ class _SignInFormState extends State<SignInForm> {
         await FirebaseAuth.instance.signInWithEmailAndPassword(
             email: _email.trim(), password: _password.trim());
 
-        FirebaseAuth.instance.currentUser().then((usr) => usr.getIdToken().then(
-            (fbToken) => Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) =>
-                        MainPage(token: fbToken.token)))));
+        var user = await FirebaseAuth.instance.currentUser();
+        var tokenId = await user.getIdToken();
+        var volunteer = await _getUserByMail(H2CHttpClient(token: tokenId.token), user.email);
+
+        log(volunteer.toString());
+
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => MainPage(token: tokenId.token,volunteer: volunteer,)));
       } catch (e) {
         print(e.message);
       }
