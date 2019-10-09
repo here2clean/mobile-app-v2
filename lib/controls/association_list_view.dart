@@ -7,26 +7,29 @@ import 'package:here_to_clean_v2/controls/association_list_all.dart';
 import 'package:here_to_clean_v2/httpClients/H2CHttpClient.dart';
 import 'package:here_to_clean_v2/model/Association.dart';
 import 'package:here_to_clean_v2/constants/h2c_api_routes.dart';
+import 'package:here_to_clean_v2/model/volunteer.dart';
 
 
 
 
 class AssociationListView extends StatefulWidget {
   final String token;
+  final Volunteer volunteer;
 
-  AssociationListView({this.token});
+  AssociationListView({this.token, this.volunteer});
 
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
-    return _AssociationListView(token: token);
+    return _AssociationListView(token: token, volunteer: volunteer);
   }
 }
 
 class _AssociationListView extends State<AssociationListView> {
   final String token;
+  final Volunteer volunteer;
 
-  _AssociationListView({this.token});
+  _AssociationListView({this.token, this.volunteer});
 
   Future<List<Association>> fetchAssociations(H2CHttpClient client) async {
     final response =
@@ -53,7 +56,7 @@ class _AssociationListView extends State<AssociationListView> {
           future: fetchAssociations(H2CHttpClient(token: token)),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
-              return AssociationList(associations: snapshot.data, token: token );
+              return AssociationList(associations: snapshot.data, token: token, volunteer: volunteer, );
             }
             return Center(child: CircularProgressIndicator());
           },

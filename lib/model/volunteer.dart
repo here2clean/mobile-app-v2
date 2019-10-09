@@ -1,10 +1,11 @@
 class Volunteer {
-  final double id;
+  final int id;
   final String firstname;
   final String surname;
   final String address;
   final String city;
   final String zipCode;
+  final String email;
 
   Volunteer(
       {this.id,
@@ -12,7 +13,8 @@ class Volunteer {
       this.surname,
       this.address,
       this.city,
-      this.zipCode});
+      this.zipCode,
+      this.email});
 
   factory Volunteer.fromJson(Map<String, dynamic> json) {
     return Volunteer(
@@ -22,6 +24,7 @@ class Volunteer {
       address: json['endDate'],
       city: json["description"],
       zipCode: json["location"],
+      email: json["email"]
     );
   }
 

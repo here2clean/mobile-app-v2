@@ -18,6 +18,7 @@ class MainPage extends StatelessWidget {
       child: Scaffold(
           drawer: MainDrawer(
             token: token,
+            volunteer: volunteer,
           ),
           appBar: AppBar(
             title: Text('Here to Clean'),
@@ -35,7 +36,7 @@ class MainPage extends StatelessWidget {
             ),
           ),
           body: TabBarView(
-            children: [MapView(token: token), EventListView(token: token)],
+            children: [MapView(token: token), EventListView(token: token, volunteer: volunteer,)],
             physics: NeverScrollableScrollPhysics(),
           )),
     );

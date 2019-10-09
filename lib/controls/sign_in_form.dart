@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:core' as prefix0;
 import 'dart:core';
 import 'dart:developer';
 
@@ -69,7 +68,7 @@ class _SignInFormState extends State<SignInForm> {
         H2CApiRoutes.getVolunteerByMail, queryParameters);
     var response = await client.get(addAVolunteerToAnEvent);
     if (response.statusCode == 200){
-      final parsed = json.decode(response.body).cast<Map<String, dynamic>>();
+      final parsed = json.decode(response.body);
       return Volunteer.fromJson(parsed);
     }
   }
@@ -88,14 +87,14 @@ class _SignInFormState extends State<SignInForm> {
         var tokenId = await user.getIdToken();
         var volunteer = await _getUserByMail(H2CHttpClient(token: tokenId.token), user.email);
 
-        log(volunteer.toString());
+        log("ici" + volunteer.toString());
 
         Navigator.push(
             context,
             MaterialPageRoute(
                 builder: (context) => MainPage(token: tokenId.token,volunteer: volunteer,)));
       } catch (e) {
-        print(e.message);
+        print(e.toString());
       }
     }
   }

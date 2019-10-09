@@ -8,24 +8,28 @@ import 'package:here_to_clean_v2/controls/event_list.dart';
 import 'package:here_to_clean_v2/httpClients/H2CHttpClient.dart';
 import 'package:here_to_clean_v2/model/Association.dart';
 import 'package:here_to_clean_v2/model/Event.dart';
+import 'package:here_to_clean_v2/model/volunteer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AssociationDetailView extends StatefulWidget {
   final Association association;
   final String token;
+  final Volunteer volunteer;
 
-  AssociationDetailView({this.association, this.token});
+  AssociationDetailView({this.association, this.token, this.volunteer});
 
   @override
   State<StatefulWidget> createState() {
-    // TODO: implement createState
-    return _AssociationDetailViewState(association: association, token: token);
+    return _AssociationDetailViewState(association: association, token: token, volunteer: volunteer);
   }
 }
 
 class _AssociationDetailViewState extends State<AssociationDetailView> {
   final Association association;
   final String token;
+  final Volunteer volunteer;
+
+  _AssociationDetailViewState({this.volunteer, this.association, this.token});
 
   Future<List<Event>> fetchEvents(H2CHttpClient client) async {
     var queryParameters = {
@@ -58,7 +62,6 @@ class _AssociationDetailViewState extends State<AssociationDetailView> {
     }
   }
 
-  _AssociationDetailViewState({this.association, this.token});
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +88,7 @@ class _AssociationDetailViewState extends State<AssociationDetailView> {
                     future: fetchEvents(H2CHttpClient(token: token)),
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
-                        return EventList(events: snapshot.data);
+                        return EventList(events: snapshot.data, token: token, volunteer: volunteer,);
                       }
                       if (snapshot.hasError) {
                         throw snapshot.error;
