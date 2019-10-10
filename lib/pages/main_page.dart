@@ -36,7 +36,7 @@ class MainPage extends StatelessWidget {
             ),
           ),
           body: TabBarView(
-            children: [MapView(token: token), EventListView(token: token, volunteer: volunteer,)],
+            children: [MapView(token: token, volunteer: volunteer,), EventListView(token: token, volunteer: volunteer,)],
             physics: NeverScrollableScrollPhysics(),
           )),
     );

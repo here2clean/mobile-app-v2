@@ -1,4 +1,11 @@
+import 'dart:convert';
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:here_to_clean_v2/constants/h2c_api_routes.dart';
+import 'package:here_to_clean_v2/httpClients/H2CHttpClient.dart';
+import 'package:here_to_clean_v2/httpClients/H2CTokenLessHttpClient.dart';
+import 'package:here_to_clean_v2/model/volunteer.dart';
 
 class SignUpForm extends StatefulWidget {
   @override
@@ -47,7 +54,7 @@ class _SignUpFormState extends State<SignUpForm> {
                         controller: _pwdController,
                         onSaved: (input) => _password = input,
                         decoration: InputDecoration(
-                            icon: Icon(Icons.lock), labelText: "Password"),
+                            icon: Icon(Icons.lock), labelText: "Mot de passe"),
                         obscureText: true,
                         validator: (input) {
                           return _notEmptyValidator(input);
@@ -57,7 +64,7 @@ class _SignUpFormState extends State<SignUpForm> {
                         onSaved: (input) => _repeatPassword = input,
                         decoration: InputDecoration(
                             icon: Icon(Icons.lock),
-                            labelText: "Repeat Password"),
+                            labelText: "Repétez le mot de passe"),
                         obscureText: true,
                         validator: (input) {
                           print(_pwdController.value.text);
@@ -70,7 +77,7 @@ class _SignUpFormState extends State<SignUpForm> {
                       TextFormField(
                         onSaved: (input) => _name = input,
                         decoration: InputDecoration(
-                            icon: Icon(Icons.face), labelText: "Name"),
+                            icon: Icon(Icons.face), labelText: "Prénom"),
                         validator: (input) {
                           return _notEmptyValidator(input);
                         },
@@ -78,15 +85,16 @@ class _SignUpFormState extends State<SignUpForm> {
                       TextFormField(
                         onSaved: (input) => _surname = input,
                         decoration: InputDecoration(
-                            icon: Icon(Icons.face), labelText: "Surname"),
+                            icon: Icon(Icons.face), labelText: "Nom"),
                         validator: (input) {
                           return _notEmptyValidator(input);
                         },
                       ),
                       TextFormField(
-                        onSaved: (input) => _birthDate = input,
+                        onSaved: (input) => _birthDate = input.toString(),
                         decoration: InputDecoration(
-                            icon: Icon(Icons.cake), labelText: "Birthdate"),
+                            icon: Icon(Icons.cake),
+                            labelText: "Date de naissance"),
                         keyboardType: TextInputType.datetime,
                         validator: (input) {
                           return _bdateValidator(input);
@@ -95,7 +103,7 @@ class _SignUpFormState extends State<SignUpForm> {
                       TextFormField(
                         onSaved: (input) => _address = input,
                         decoration: InputDecoration(
-                            icon: Icon(Icons.place), labelText: "Address"),
+                            icon: Icon(Icons.place), labelText: "Adresse"),
                         keyboardType: TextInputType.text,
                         validator: (input) {
                           return _notEmptyValidator(input);
@@ -104,7 +112,7 @@ class _SignUpFormState extends State<SignUpForm> {
                       TextFormField(
                         onSaved: (input) => _city = input,
                         decoration: InputDecoration(
-                            icon: Icon(Icons.place), labelText: "City"),
+                            icon: Icon(Icons.place), labelText: "Ville"),
                         keyboardType: TextInputType.datetime,
                         validator: (input) {
                           return _notEmptyValidator(input);
@@ -113,15 +121,15 @@ class _SignUpFormState extends State<SignUpForm> {
                       TextFormField(
                         onSaved: (input) => _cityCode = input,
                         decoration: InputDecoration(
-                            icon: Icon(Icons.place), labelText: "City Code"),
+                            icon: Icon(Icons.place), labelText: "Code Postal"),
                         keyboardType: TextInputType.number,
                         validator: (input) {
                           return _zipValidator(input);
                         },
                       ),
                       RaisedButton(
-                        child: Text('Join us !'),
-                        onPressed: _signUp,
+                        child: Text('Rejoins nous !'),
+                        onPressed: () => {_signUp(H2CTokenLessHttpClient())},
                         shape: RoundedRectangleBorder(
                             borderRadius:
                                 BorderRadius.all(Radius.circular(10))),
@@ -132,10 +140,38 @@ class _SignUpFormState extends State<SignUpForm> {
                 ))));
   }
 
-  void _signUp() {
-    if (_SignUpFormGlobalKey.currentState.validate()) {
-      _SignUpFormGlobalKey.currentState.save();
+  Future<void> _signUp(H2CTokenLessHttpClient client) async {
+    final FormState formState = _SignUpFormGlobalKey.currentState;
+    if(formState.validate()){
+      formState.save();
+      final Volunteer v = new Volunteer(
+          address: _address,
+          id: 0,
+          lastName: _name,
+          firstName: _surname,
+          city: _city,
+          cityCode: _cityCode,
+          birthday: DateTime.now() ,// DateTime.parse(formatDate(_birthDate)),
+          email: _email,
+          password: _password);
+
+
+      Map<String, String> body =  v.toJson();
+      log(json.encode(body));
+
+      Uri getAllEventsByAssociation = Uri.http(
+          H2CApiRoutes.HereToClean, H2CApiRoutes.signUp);
+
+      final response = await client.post(getAllEventsByAssociation, body:json.encode(body)  );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        _showToast(context);
+      } else {
+        throw new Exception(response.body);
+      }
     }
+
+
   }
 
   String _emailValidator(input) {
@@ -175,5 +211,23 @@ class _SignUpFormState extends State<SignUpForm> {
       return "Ce champ est obligatoire";
     }
     return null;
+  }
+
+  void _showToast(BuildContext context) {
+    final scaffold = Scaffold.of(context);
+    scaffold.showSnackBar(
+      SnackBar(
+        content: const Text("Enregisté !"),
+        action: SnackBarAction(
+            label: 'UNDO', onPressed: scaffold.hideCurrentSnackBar),
+      ),
+    );
+  }
+
+  String formatDate(String date) {
+    log(date);
+    var items = date.split("/");
+    log("" + items[2].toString() + items[1].toString() + items[0].toString());
+    return "" + items[2].toString() + items[1].toString() + items[0].toString();
   }
 }

@@ -97,7 +97,7 @@ class _UniqueMapViewState extends State<UniqueMapView> {
             markerId: MarkerId(event.id.toString()),
             position: LatLng(values.first.coordinates.latitude,
                 values.first.coordinates.longitude),
-            infoWindow: InfoWindow(title: event.name)));
+            infoWindow: InfoWindow(title: event.location)));
 
     return output;
   }

@@ -30,15 +30,10 @@ class _DetailEventPageState extends State<DetailEventPage> {
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(event.name),
-      ),
-      body: EventDetailView(
-        event: event,
-        token: token,
-        volunteer: volunteer,
-      ),
+    return EventDetailView(
+      event: event,
+      token: token,
+      volunteer: volunteer,
     );
   }
 }

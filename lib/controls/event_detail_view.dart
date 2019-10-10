@@ -14,13 +14,13 @@ class EventDetailView extends StatefulWidget {
   final Event event;
   final Volunteer volunteer;
 
-
   EventDetailView({this.token, this.event, this.volunteer});
 
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
-    return _EventDetailViewState(token: token, event: event, volunteer: volunteer);
+    return _EventDetailViewState(
+        token: token, event: event, volunteer: volunteer);
   }
 }
 
@@ -31,10 +31,8 @@ class _EventDetailViewState extends State<EventDetailView> {
 
   VolunteerState state = VolunteerState.unenrolled;
 
- Future<void> GetEventState(H2CHttpClient client) async {
-    var queryParameters = {
-      'email': volunteer.email
-    };
+  Future<void> GetEventState(H2CHttpClient client) async {
+    var queryParameters = {'email': volunteer.email};
 
     Uri getEventsOfAVolunteer = Uri.http(H2CApiRoutes.HereToClean,
         H2CApiRoutes.getEventsOfAVolunteer, queryParameters);
@@ -43,16 +41,13 @@ class _EventDetailViewState extends State<EventDetailView> {
 
     if (response.statusCode == 200) {
       List<Event> myEvents = parseMyEvents(response.body);
-      if(myEvents.map((mEvent) => mEvent.id == event.id ).length > 0){
+      if (myEvents.map((mEvent) => mEvent.id == event.id).length > 0) {
         setState(() {
           state = VolunteerState.enrolled;
         });
-
       }
-
-
     } else {
-      throw(response.statusCode);
+      throw (response.statusCode);
     }
   }
 
@@ -76,7 +71,7 @@ class _EventDetailViewState extends State<EventDetailView> {
     if (response.statusCode == 200) {
       return true;
     } else {
-      throw(response.statusCode);
+      throw (response.statusCode);
     }
   }
 
@@ -94,81 +89,127 @@ class _EventDetailViewState extends State<EventDetailView> {
     if (response.statusCode == 200) {
       return true;
     } else {
-      throw(response.statusCode);
+      throw (response.statusCode);
     }
   }
 
   _EventDetailViewState({this.token, this.event, this.volunteer});
 
- @override
+  @override
   void initState() {
     GetEventState(H2CHttpClient(token: token));
     super.initState();
   }
+
+  String formatDate(DateTime date) {
+    return date.day.toString() +
+        "/" +
+        date.month.toString() +
+        "/" +
+        date.year.toString();
+  }
+
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-    return Container(
-      decoration: BoxDecoration(
-          gradient: LinearGradient(
-              begin: Alignment.topRight,
-              end: Alignment.bottomCenter,
-              colors: [Colors.green, Colors.white])),
-      child: Padding(
-        child: Column(children: <Widget>[
-          Row(children: [
-            Card(
-              child: Text(event.description),
-            )
-          ]),
-          Expanded(child: Container()),
-          Container(),
-          Stack(
-            children: <Widget>[
-              Row(
-                children: <Widget>[
-                  Expanded(
-                    child: Container(
-                      width: 200,
-                      height: 300,
-                      child: UniqueMapView(token: token, event: event),
-                    ),
-                  )
-                ],
-              ),
-              Positioned(
-                right: 0,
-                child: FloatingActionButton.extended(
-                  label: (state != VolunteerState.enrolled
-                      ? Text("S'incsrire")
-                      : Text("Se désinscrire")),
-                  onPressed: () {
-                    setState(() {
-                      if (state == VolunteerState.enrolled) {
-                        signOutAnEvent(H2CHttpClient(token: token));
-                        state = VolunteerState.unenrolled;
-                      } else {
-                        signInAnEvent(H2CHttpClient(token: token));
-                        state = VolunteerState.enrolled;
-                      }
-                    });
-                  },
-                  tooltip: (state != VolunteerState.enrolled
-                      ? "S'incsrire"
-                      : "Se desinscrire"),
-                  icon: Icon((state != VolunteerState.enrolled
-                      ? Icons.crop_square
-                      : Icons.check_box)),
-                  backgroundColor: (state != VolunteerState.enrolled
-                      ? Colors.green
-                      : Colors.green),
-                ),
-              )
-            ],
-          )
-        ]),
-        padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
-      ),
+    AppBar _appBar = AppBar(
+      title: Text(event.name),
     );
+
+    // TODO: implement build
+    return Scaffold(
+        appBar: _appBar,
+        body: Column(
+          children: <Widget>[
+            Container(
+              color: Colors.green,
+              height: (MediaQuery.of(context).size.height -
+                          _appBar.preferredSize.height) /
+                      2 -
+                  10 -
+                  60,
+              width: _appBar.preferredSize.width - 14,
+              child: Card(
+                child: Text(event.description),
+              ),
+            ),
+            Container(
+              color: Colors.green,
+              height: 60,
+              width: _appBar.preferredSize.width - 10,
+              child: Card(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    Container(
+                      width: 220,
+                      height: 50,
+                      child: Text(formatDate(event.beginDate)),
+                    ),
+                    (event.endDate.millisecondsSinceEpoch <
+                            DateTime.now().millisecondsSinceEpoch
+                        ? Container()
+                        : Container(
+                            child: Stack(
+                              children: <Widget>[
+                                Container(
+                                  height: 50,
+                                  width: 50,
+                                ),
+                                Positioned(
+                                  child: FloatingActionButton.extended(
+                                    label: (state != VolunteerState.enrolled
+                                        ? Text("S'incsrire")
+                                        : Text("Se désinscrire")),
+                                    onPressed: () {
+                                      setState(() {
+                                        if (state == VolunteerState.enrolled) {
+                                          signOutAnEvent(
+                                              H2CHttpClient(token: token));
+                                          state = VolunteerState.unenrolled;
+                                        } else {
+                                          signInAnEvent(
+                                              H2CHttpClient(token: token));
+                                          state = VolunteerState.enrolled;
+                                        }
+                                      });
+                                    },
+                                    tooltip: (state != VolunteerState.enrolled
+                                        ? "S'incsrire"
+                                        : "Se desinscrire"),
+                                    icon: Icon((state != VolunteerState.enrolled
+                                        ? Icons.crop_square
+                                        : Icons.check_box)),
+                                    backgroundColor:
+                                        (state != VolunteerState.enrolled
+                                            ? Colors.green
+                                            : Colors.green),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ))
+                  ],
+                ),
+              ),
+            ),
+            Container(
+              color: Colors.green,
+              height: (MediaQuery.of(context).size.height -
+                          _appBar.preferredSize.height) /
+                      2 -
+                  14,
+              width: _appBar.preferredSize.width - 10,
+              child: Card(
+                  child: Container(
+                      child: Stack(
+                children: <Widget>[
+                  Container(
+                    child: UniqueMapView(token: token, event: event),
+                  ),
+                ],
+              ))),
+            ),
+          ],
+        ));
   }
 }

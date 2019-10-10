@@ -20,6 +20,18 @@ class _SignInFormState extends State<SignInForm> {
   String _email;
   String _password;
   final GlobalKey<FormState> _SignInFormGlobalKey = GlobalKey<FormState>();
+  bool hasError = false;
+
+  void _showToast(BuildContext context, String e) {
+    final scaffold = Scaffold.of(context);
+    scaffold.showSnackBar(
+      SnackBar(
+        content:  Text("Indentifiants inconnus "+e),
+        action: SnackBarAction(
+            label: 'UNDO', onPressed: scaffold.hideCurrentSnackBar),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +48,7 @@ class _SignInFormState extends State<SignInForm> {
                         return 'Format de l\'adresse mail incorrect';
                       }
                     },
-                    onSaved: (input) => _email = input,
+                    onSaved: (input) => {  _email = input},
                     decoration: InputDecoration(
                       icon: Icon(Icons.mail),
                       labelText: "Mail",
@@ -59,7 +71,8 @@ class _SignInFormState extends State<SignInForm> {
               ),
             )));
   }
-  Future<Volunteer> _getUserByMail(H2CHttpClient client, String mail) async{
+
+  Future<Volunteer> _getUserByMail(H2CHttpClient client, String mail) async {
     var queryParameters = {
       'email': mail,
     };
@@ -67,7 +80,7 @@ class _SignInFormState extends State<SignInForm> {
     Uri addAVolunteerToAnEvent = Uri.http(H2CApiRoutes.HereToClean,
         H2CApiRoutes.getVolunteerByMail, queryParameters);
     var response = await client.get(addAVolunteerToAnEvent);
-    if (response.statusCode == 200){
+    if (response.statusCode == 200) {
       final parsed = json.decode(response.body);
       return Volunteer.fromJson(parsed);
     }
@@ -79,23 +92,23 @@ class _SignInFormState extends State<SignInForm> {
       formState.save();
       print("_password" + _password);
       print("_email" + _email);
-      try {
+
         await FirebaseAuth.instance.signInWithEmailAndPassword(
-            email: _email.trim(), password: _password.trim());
+            email: _email.trim(), password: _password.toString().trim());
 
         var user = await FirebaseAuth.instance.currentUser();
         var tokenId = await user.getIdToken();
-        var volunteer = await _getUserByMail(H2CHttpClient(token: tokenId.token), user.email);
-
-        log("ici" + volunteer.toString());
+        var volunteer = await _getUserByMail(
+            H2CHttpClient(token: tokenId.token), user.email);
 
         Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => MainPage(token: tokenId.token,volunteer: volunteer,)));
-      } catch (e) {
-        print(e.toString());
-      }
+                builder: (context) => MainPage(
+                      token: tokenId.token,
+                      volunteer: volunteer,
+                    )));
+
     }
   }
 }

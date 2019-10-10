@@ -56,17 +56,6 @@ class _MainDrawerState extends State<MainDrawer> {
                       builder: (context) => AssociationsPage(token: token,  volunteer: volunteer)))
             },
           ),
-          ListTile(
-            title: Text("Mon profil"),
-            onTap: () => {},
-          ),
-          ListTile(
-            title: Text("CGU"),
-            onTap: () => {
-              Navigator.push(
-                  context, MaterialPageRoute(builder: (context) => CGUPage()))
-            },
-          ),
         ],
       ),
     );
