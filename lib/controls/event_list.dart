@@ -31,7 +31,7 @@ class EventList extends StatelessWidget {
                   child: Row(
                     children: <Widget>[
                       (events[index].urlImage != null
-                          ? Image.network(events[index].urlImage, width: 150, height: 150,)
+                          ? Image.network(events[index].urlImage, width: 150, height: 150, fit: BoxFit.cover,)
                           : Container(
                         decoration: BoxDecoration(color: Colors.green),
                         child: Image.asset('assets/logos/h2clogo.png'),

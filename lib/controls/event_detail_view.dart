@@ -6,8 +6,10 @@ import 'package:here_to_clean_v2/constants/h2c_api_routes.dart';
 import 'package:here_to_clean_v2/controls/unique_map_view.dart';
 import 'package:here_to_clean_v2/enums/VolunteerState.dart';
 import 'package:here_to_clean_v2/httpClients/H2CHttpClient.dart';
+import 'package:here_to_clean_v2/model/Association.dart';
 import 'package:here_to_clean_v2/model/Event.dart';
 import 'package:here_to_clean_v2/model/volunteer.dart';
+import 'package:intl/intl.dart';
 
 class EventDetailView extends StatefulWidget {
   final String token;
@@ -28,10 +30,11 @@ class _EventDetailViewState extends State<EventDetailView> {
   final String token;
   final Event event;
   final Volunteer volunteer;
+  Association association;
 
   VolunteerState state = VolunteerState.unenrolled;
 
-  Future<void> GetEventState(H2CHttpClient client) async {
+  Future<void> getEventState(H2CHttpClient client) async {
     var queryParameters = {'email': volunteer.email};
 
     Uri getEventsOfAVolunteer = Uri.http(H2CApiRoutes.HereToClean,
@@ -41,7 +44,7 @@ class _EventDetailViewState extends State<EventDetailView> {
 
     if (response.statusCode == 200) {
       List<Event> myEvents = parseMyEvents(response.body);
-      if (myEvents.map((mEvent) => mEvent.id == event.id).length > 0) {
+      if (myEvents.where((mEvent) => mEvent.id == event.id).length > 0) {
         setState(() {
           state = VolunteerState.enrolled;
         });
@@ -97,119 +100,134 @@ class _EventDetailViewState extends State<EventDetailView> {
 
   @override
   void initState() {
-    GetEventState(H2CHttpClient(token: token));
+    getEventState(H2CHttpClient(token: token));
     super.initState();
   }
 
   String formatDate(DateTime date) {
-    return date.day.toString() +
-        "/" +
-        date.month.toString() +
-        "/" +
-        date.year.toString();
+    return new DateFormat('dd-MM-yyyy ').format(date);
   }
 
   @override
   Widget build(BuildContext context) {
-    AppBar _appBar = AppBar(
-      title: Text(event.name),
-    );
-
-    // TODO: implement build
+    double availableWidth = MediaQuery.of(context).size.width - 160;
     return Scaffold(
-        appBar: _appBar,
-        body: Column(
-          children: <Widget>[
-            Container(
-              color: Colors.green,
-              height: (MediaQuery.of(context).size.height -
-                          _appBar.preferredSize.height) /
-                      2 -
-                  10 -
-                  60,
-              width: _appBar.preferredSize.width - 14,
-              child: Card(
-                child: Text(event.description),
-              ),
-            ),
-            Container(
-              color: Colors.green,
-              height: 60,
-              width: _appBar.preferredSize.width - 10,
-              child: Card(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    Container(
-                      width: 220,
-                      height: 50,
-                      child: Text(formatDate(event.beginDate)),
-                    ),
-                    (event.endDate.millisecondsSinceEpoch <
-                            DateTime.now().millisecondsSinceEpoch
-                        ? Container()
-                        : Container(
-                            child: Stack(
-                              children: <Widget>[
-                                Container(
-                                  height: 50,
-                                  width: 50,
-                                ),
-                                Positioned(
-                                  child: FloatingActionButton.extended(
-                                    label: (state != VolunteerState.enrolled
-                                        ? Text("S'incsrire")
-                                        : Text("Se désinscrire")),
-                                    onPressed: () {
-                                      setState(() {
-                                        if (state == VolunteerState.enrolled) {
-                                          signOutAnEvent(
-                                              H2CHttpClient(token: token));
-                                          state = VolunteerState.unenrolled;
-                                        } else {
-                                          signInAnEvent(
-                                              H2CHttpClient(token: token));
-                                          state = VolunteerState.enrolled;
-                                        }
-                                      });
-                                    },
-                                    tooltip: (state != VolunteerState.enrolled
-                                        ? "S'incsrire"
-                                        : "Se desinscrire"),
-                                    icon: Icon((state != VolunteerState.enrolled
-                                        ? Icons.crop_square
-                                        : Icons.check_box)),
-                                    backgroundColor:
-                                        (state != VolunteerState.enrolled
-                                            ? Colors.green
-                                            : Colors.green),
-                                  ),
-                                )
-                              ],
-                            ),
-                          ))
-                  ],
-                ),
-              ),
-            ),
-            Container(
-              color: Colors.green,
-              height: (MediaQuery.of(context).size.height -
-                          _appBar.preferredSize.height) /
-                      2 -
-                  14,
-              width: _appBar.preferredSize.width - 10,
-              child: Card(
-                  child: Container(
-                      child: Stack(
-                children: <Widget>[
-                  Container(
-                    child: UniqueMapView(token: token, event: event),
+      body: CustomScrollView(slivers: <Widget>[
+        SliverAppBar(
+          pinned: true,
+          expandedHeight: 250.0,
+          flexibleSpace: FlexibleSpaceBar(
+              title: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: availableWidth,
                   ),
-                ],
-              ))),
+                  child: Padding(
+                    child: Text(
+                      event.name,
+                      softWrap: true,
+                      style: TextStyle(
+                        fontSize: 20,
+                        color: Colors.white,
+                        fontFamily: 'Roboto',
+                      ),
+                      overflow: TextOverflow.fade,
+                    ),
+                    padding: EdgeInsets.fromLTRB(0, 0, 10, 0),
+                  )),
+              background: Image.network(
+                event.urlImage,
+                fit: BoxFit.cover,
+              )),
+        ),
+        SliverFixedExtentList(
+          itemExtent: 200.0,
+          delegate: SliverChildListDelegate([
+            Container(
+              child: UniqueMapView(
+                token: token,
+                event: event,
+              ),
+              color: Colors.white,
             ),
-          ],
-        ));
+            Container(
+              padding: EdgeInsets.all(10),
+              color: Colors.white,
+              child: Text(
+                event.description,
+                style: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 16,
+                    fontFamily: 'RobotoSlab',
+                    fontStyle: FontStyle.italic),
+              ),
+            ),
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: Container(
+                    child: Text("Du : " +
+                        formatDate(event.beginDate) +
+                        '\n' +
+                        "Au : " +
+                        formatDate(event.endDate)),
+                    color: Colors.transparent,
+                  ),
+                ),
+                Container(
+                  width: 200,
+                  height: 250,
+                  child: GestureDetector(
+                    child: Container(
+                      decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                              colors: ([
+                                Colors.lightGreen,
+                                Colors.green,
+                                Colors.lightGreen
+                              ]),
+                              begin: Alignment.topRight,
+                              end: Alignment.bottomLeft)),
+                      child: Padding(
+                        child: Row(
+                          children: <Widget>[
+                            Icon(
+                              (state != VolunteerState.enrolled
+                                  ? Icons.crop_square
+                                  : Icons.check_box),
+                              color: Colors.white,
+                            ),
+                            (state != VolunteerState.enrolled
+                                ? Text(
+                                    "S'inscrire",
+                                    style: TextStyle(color: Colors.white),
+                                  )
+                                : Text("Se désinscrire",
+                                    style: TextStyle(color: Colors.white)))
+                          ],
+                        ),
+                        padding: EdgeInsets.fromLTRB(30, 0, 0, 0),
+                      ),
+                    ),
+                    onTap: () => {
+                      setState(() {
+                        if (state == VolunteerState.enrolled) {
+                          log("enrolled");
+                          signOutAnEvent(H2CHttpClient(token: token));
+                          state = VolunteerState.unenrolled;
+                        } else {
+                          log("unenrolled");
+                          signInAnEvent(H2CHttpClient(token: token));
+                          state = VolunteerState.enrolled;
+                        }
+                      })
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ]),
+        )
+      ]),
+    );
   }
 }

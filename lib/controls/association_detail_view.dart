@@ -20,7 +20,8 @@ class AssociationDetailView extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() {
-    return _AssociationDetailViewState(association: association, token: token, volunteer: volunteer);
+    return _AssociationDetailViewState(
+        association: association, token: token, volunteer: volunteer);
   }
 }
 
@@ -50,6 +51,7 @@ class _AssociationDetailViewState extends State<AssociationDetailView> {
 
   static List<Event> parseEvents(String responseBody) {
     final parsed = json.decode(responseBody).cast<Map<String, dynamic>>();
+
     return parsed.map<Event>((json) => Event.fromJson(json)).toList();
   }
 
@@ -62,55 +64,48 @@ class _AssociationDetailViewState extends State<AssociationDetailView> {
     }
   }
 
-
+@override
+  void initState() {
+    // TODO: implement initState
+      super.initState();
+  }
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-    return Container(
-      decoration: BoxDecoration(
-          gradient: LinearGradient(
-              begin: Alignment.topRight,
-              end: Alignment.bottomCenter,
-              colors: [Colors.green, Colors.white])),
-      child: Padding(
-        child: Column(children: <Widget>[
-          Row(
-            children: <Widget>[Text(association.description)],
-          ),
-          Expanded(child: Container()),
-          Row(
-            children: <Widget>[
-              Expanded(
-                child: Container(
-                  width: 200,
-                  height: 500,
-                  child: FutureBuilder<List<Event>>(
-                    future: fetchEvents(H2CHttpClient(token: token)),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        return EventList(events: snapshot.data, token: token, volunteer: volunteer,);
-                      }
-                      if (snapshot.hasError) {
-                        throw snapshot.error;
-                      }
-                      return Center(child: CircularProgressIndicator());
-                    },
-                  ),
-                ),
-              )
-            ],
-          ),
-          ButtonBar(
-            children: <Widget>[
-              RaisedButton(
-                child: Icon(Icons.shopping_cart),
-                onPressed: () => {_launchURL()},
-              )
-            ],
+    double availableWidth = MediaQuery.of(context).size.width - 160;
+    return Scaffold(
+      body: CustomScrollView(
+        slivers: <Widget>[
+          SliverAppBar(
+              flexibleSpace: FlexibleSpaceBar(
+                  title: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: availableWidth,
+                      ),
+                      child: Padding(
+                        child: Text(
+                          association.name,
+                          softWrap: true,
+                          style: TextStyle(
+                            fontSize: 20,
+                            color: Colors.white,
+                            fontFamily: 'RobotoSlab',
+                          ),
+                          overflow: TextOverflow.fade,
+                        ),
+                        padding: EdgeInsets.fromLTRB(0, 0, 10, 0),
+                      )),
+                  background: Image.network(
+                    association.urlImage,
+                    fit: BoxFit.cover,
+                  ))
           )
-        ]),
-        padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
+        ],
       ),
+      bottomSheet: Container(
+        child: ButtonBar(
+          children: <Widget>[TextField(),Switch()],
+        ),
+      )
     );
   }
 }

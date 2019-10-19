@@ -18,41 +18,43 @@ import 'package:permission_handler/permission_handler.dart';
 class MapView extends StatefulWidget {
   final String token;
   final Volunteer volunteer;
+  final Map<String, String> filters;
 
-  MapView({this.token, this.volunteer});
+  MapView({this.token, this.volunteer, this.filters});
 
   @override
   State<StatefulWidget> createState() {
-    // TODO: implement createState
-    return new _MapViewState(token: token, volunteer:volunteer);
+    return new _MapViewState(token: token, volunteer:volunteer, filters:  filters);
   }
 }
 
 class _MapViewState extends State<MapView> {
   final String token;
   final Volunteer volunteer;
+  final Map<String, String> filters;
 
-  _MapViewState({this.token, this.volunteer});
-
-  Set<Marker> _markers = new Set<Marker>();
-  Future _future;
-
+  _MapViewState({this.token, this.volunteer, this.filters});
 
   CameraPosition _defaultPos =
       new CameraPosition(target: LatLng(48.856613, 2.352222), zoom: 15);
   Completer<GoogleMapController> _controller = Completer();
 
-  static List<Event> parseEvents(String responseBody) {
+  static List<Event> parseEvents(String responseBody, Map<String, String> filters) {
     final parsed = json.decode(responseBody).cast<Map<String, dynamic>>();
-    return parsed.map<Event>((json) => Event.fromJson(json)).toList();
+    List<Event> events = parsed.map<Event>((json) => Event.fromJson(json)).toList();
+    events = events.where((e) => (e.endDate.isAfter(DateTime.now())|| filters["filterByDate"] == "false")).toList();
+    return events;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        child: FutureBuilder(
-            future: SetMapDisplay(),
+    return Scaffold(
+        body: FutureBuilder(
+            future: setMapDisplay(),
             builder: (context, AsyncSnapshot snapshot) {
+              if(snapshot.hasError){
+                throw snapshot.error;
+              }
               if (!snapshot.hasData) {
                 return Center(
                   child: CircularProgressIndicator(),
@@ -66,7 +68,8 @@ class _MapViewState extends State<MapView> {
                     },
                     markers: snapshot.data["markers"]);
               }
-            }));
+            }),
+    );
   }
 
   @override
@@ -75,14 +78,14 @@ class _MapViewState extends State<MapView> {
     super.initState();
   }
 
-  Future<HashMap<String, Object>> SetMapDisplay() async {
+  Future<HashMap<String, Object>> setMapDisplay() async {
     List<Event> events = await fetchEvent(H2CHttpClient(token: token));
     Set<Marker> markers = new Set<Marker>();
     for (var event in events) {
       Marker marker = await eventToMarker(event);
       markers.add((marker));
     }
-    CameraPosition cameraPosition = await GetUsersCameraPosition();
+    CameraPosition cameraPosition = await getUsersCameraPosition();
     HashMap<String, Object> output = new HashMap<String, Object>();
     output.addEntries([
       MapEntry("cameraPosition", cameraPosition),
@@ -115,7 +118,7 @@ class _MapViewState extends State<MapView> {
     final response = await client.get(H2CApiRoutes.getAllEvents);
 
     if (response.statusCode == 200) {
-      return compute(parseEvents, response.body);
+      return parseEvents(response.body, filters);
     } else {
       throw new Exception(response.statusCode);
     }
@@ -128,7 +131,7 @@ class _MapViewState extends State<MapView> {
     ]);
   }
 
-  Future<CameraPosition> GetUsersCameraPosition() async {
+  Future<CameraPosition> getUsersCameraPosition() async {
     var location = new Location();
     try {
       var currentLocation = await location.getLocation();
