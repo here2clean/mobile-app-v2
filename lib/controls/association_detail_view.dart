@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:developer';
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -64,18 +64,23 @@ class _AssociationDetailViewState extends State<AssociationDetailView> {
     }
   }
 
-@override
+  @override
   void initState() {
     // TODO: implement initState
-      super.initState();
+    super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     double availableWidth = MediaQuery.of(context).size.width - 160;
+    double availableLenght = MediaQuery.of(context).size.height - 400;
+
     return Scaffold(
       body: CustomScrollView(
         slivers: <Widget>[
           SliverAppBar(
+            pinned: false,
+              expandedHeight: 150,
               flexibleSpace: FlexibleSpaceBar(
                   title: ConstrainedBox(
                       constraints: BoxConstraints(
@@ -94,18 +99,68 @@ class _AssociationDetailViewState extends State<AssociationDetailView> {
                         ),
                         padding: EdgeInsets.fromLTRB(0, 0, 10, 0),
                       )),
-                  background: Image.network(
-                    association.urlImage,
-                    fit: BoxFit.cover,
-                  ))
+                  background: (association.urlImage != null
+                      ? Image.network(association.urlImage, width: 150)
+                      : Image.asset('assets/logos/h2clogo.png', width: 150,)))),
+          SliverList(
+            delegate: SliverChildListDelegate([
+              Container(
+                padding: EdgeInsets.all(10),
+                height: 200,
+                color: Colors.white,
+                child: Text(
+                  association.description,
+                  style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 16,
+                      fontFamily: 'RobotoSlab',
+                      fontStyle: FontStyle.italic),
+                ),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.green, Colors.white],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter
+
+                  )
+                ),
+                height: availableLenght,
+                child: FutureBuilder<List<Event>>(
+                  future: fetchEvents(H2CHttpClient(token: token)),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      return Padding(
+                        child: EventList(
+                          events: new List<Event>(),
+                          token: token,
+                          volunteer: volunteer,
+                        ),
+                        padding: EdgeInsets.fromLTRB(0, 0, 0, 90),
+                      );
+                    }
+                    if (snapshot.hasData) {
+                      return Container(
+                        child: EventList(
+                          events: snapshot.data,
+                          token: token,
+                          volunteer: volunteer,
+                        ),
+                    );
+                    }
+                    return Center(child: CircularProgressIndicator());
+                  },
+                ),
+              )
+            ]),
           )
         ],
       ),
-      bottomSheet: Container(
-        child: ButtonBar(
-          children: <Widget>[TextField(),Switch()],
-        ),
-      )
-    );
+    bottomSheet: ButtonBar(
+      children: <Widget>[FlatButton(child: Icon(Icons.shopping_cart), onPressed: (
+          ()=> {_launchURL()}
+      ),)],
+    ),);
   }
 }

@@ -8,6 +8,7 @@ import 'package:here_to_clean_v2/constants/h2c_api_routes.dart';
 import 'package:here_to_clean_v2/httpClients/H2CHttpClient.dart';
 import 'package:here_to_clean_v2/model/volunteer.dart';
 import 'package:here_to_clean_v2/pages/main_page.dart';
+import 'package:toast/toast.dart';
 
 class SignInForm extends StatefulWidget {
   @override
@@ -26,7 +27,7 @@ class _SignInFormState extends State<SignInForm> {
     final scaffold = Scaffold.of(context);
     scaffold.showSnackBar(
       SnackBar(
-        content:  Text("Indentifiants inconnus "+e),
+        content: Text("Indentifiants inconnus " + e),
         action: SnackBarAction(
             label: 'UNDO', onPressed: scaffold.hideCurrentSnackBar),
       ),
@@ -48,7 +49,7 @@ class _SignInFormState extends State<SignInForm> {
                         return 'Format de l\'adresse mail incorrect';
                       }
                     },
-                    onSaved: (input) => {  _email = input},
+                    onSaved: (input) => {_email = input},
                     decoration: InputDecoration(
                       icon: Icon(Icons.mail),
                       labelText: "Mail",
@@ -93,6 +94,7 @@ class _SignInFormState extends State<SignInForm> {
       print("_password" + _password);
       print("_email" + _email);
 
+      try {
         await FirebaseAuth.instance.signInWithEmailAndPassword(
             email: _email.trim(), password: _password.toString().trim());
 
@@ -108,7 +110,10 @@ class _SignInFormState extends State<SignInForm> {
                       token: tokenId.token,
                       volunteer: volunteer,
                     )));
-
+      } catch (e) {
+        Toast.show("Identifiants introuvables", context,
+            duration: Toast.LENGTH_SHORT, gravity: Toast.CENTER);
+      }
     }
   }
 }

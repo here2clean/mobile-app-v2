@@ -24,25 +24,46 @@ class EventList extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                           builder: (context) => DetailEventPage(
-                            event: events[index], token: token, volunteer: volunteer,)))
-
+                                event: events[index],
+                                token: token,
+                                volunteer: volunteer,
+                              )))
                 },
                 child: Card(
-                  child: Row(
-                    children: <Widget>[
-                      (events[index].urlImage != null
-                          ? Image.network(events[index].urlImage, width: 150, height: 150, fit: BoxFit.cover,)
-                          : Container(
-                        decoration: BoxDecoration(color: Colors.green),
-                        child: Image.asset('assets/logos/h2clogo.png'),
-                        width: 150,
-                      )),
-                      Text(events[index].name)
-                    ],
-                  ),
+                  child: Container(
+                    padding: EdgeInsets.all(5),
+                    color: Colors.white,
+                    child: Row(
+                      children: <Widget>[
+                        (events[index].urlImage != null
+                            ? Image.network(
+                          events[index].urlImage,
+                          width: 150,
+                          height: 150,
+                          fit: BoxFit.cover,
+                        )
+                            : Container(
+                          decoration: BoxDecoration(color: Colors.green),
+                          child: Image.asset('assets/logos/h2clogo.png'),
+                          width: 150,
+                          height: 150,
+                        )),
+                        Container(
+                          child: Expanded(
+                            child: Center(
+                              child: Text(
+                                events[index].name,
+                                softWrap: true,
+                                style: TextStyle(fontSize: 12),
+                              ),
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                  )
                 ),
-              )
-              ,
+              ),
             ],
           );
         });

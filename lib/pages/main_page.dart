@@ -27,7 +27,7 @@ class _MainPageState extends State<MainPage>{
     "filterByDate" : "false"
   };
 
-  bool _isFiltered = true;
+  bool _isFiltered = false;
 
   _MainPageState({this.token, this.volunteer});
 

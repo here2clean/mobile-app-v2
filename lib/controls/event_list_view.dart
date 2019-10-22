@@ -12,13 +12,12 @@ class EventListView extends StatefulWidget {
   final Volunteer volunteer;
   final Map<String, String> filters;
 
-
   EventListView({this.token, this.volunteer, this.filters});
 
   @override
   State<StatefulWidget> createState() {
-
-    return _EventListViewState(token: token, volunteer: volunteer, filters: filters);
+    return _EventListViewState(
+        token: token, volunteer: volunteer, filters: filters);
   }
 }
 
@@ -26,8 +25,6 @@ class _EventListViewState extends State<EventListView> {
   final String token;
   final Volunteer volunteer;
   final Map<String, String> filters;
-
-
 
   _EventListViewState({this.token, this.volunteer, this.filters});
 
@@ -41,16 +38,20 @@ class _EventListViewState extends State<EventListView> {
     }
   }
 
-  static List<Event> parseEvents(String responseBody, Map<String, String> filters) {
+  static List<Event> parseEvents(
+      String responseBody, Map<String, String> filters) {
     final parsed = json.decode(responseBody).cast<Map<String, dynamic>>();
-    List<Event> events = parsed.map<Event>((json) => Event.fromJson(json)).toList();
-    events = events.where((e) => (e.endDate.isAfter(DateTime.now())|| filters["filterByDate"] == "false")).toList();
+    List<Event> events =
+        parsed.map<Event>((json) => Event.fromJson(json)).toList();
+    events = events
+        .where((e) => (e.endDate.isAfter(DateTime.now()) ||
+            filters["filterByDate"] == "false"))
+        .toList();
     return events;
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
         body: Container(
       decoration: BoxDecoration(
@@ -62,11 +63,18 @@ class _EventListViewState extends State<EventListView> {
         child: FutureBuilder<List<Event>>(
           future: fetchEvents(H2CHttpClient(token: token)),
           builder: (context, snapshot) {
-            if( snapshot.hasError){
+            if (snapshot.hasError) {
               throw snapshot.error;
             }
             if (snapshot.hasData) {
-              return EventList(events: snapshot.data, token: token, volunteer: volunteer,);
+              return Padding(
+                child: EventList(
+                  events: snapshot.data,
+                  token: token,
+                  volunteer: volunteer,
+                ),
+                padding: EdgeInsets.fromLTRB(0, 0, 0, 90),
+              );
             }
             return Center(child: CircularProgressIndicator());
           },

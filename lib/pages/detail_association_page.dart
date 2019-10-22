@@ -28,15 +28,10 @@ class _DetailAssociationPageState extends State<DetailAssociationPage> {
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(association.name),
-      ),
-      body: AssociationDetailView(
-        association: association,
-        token: token,
-        volunteer: volunteer,
-      ),
+    return AssociationDetailView(
+      association: association,
+      token: token,
+      volunteer: volunteer,
     );
   }
 }

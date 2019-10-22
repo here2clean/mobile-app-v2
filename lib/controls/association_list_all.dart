@@ -19,18 +19,31 @@ class AssociationList extends StatelessWidget {
             children: <Widget>[
               GestureDetector(
                 child: Card(
-                  child: Row(
-                    children: <Widget>[
-                      (associations[index].urlImage != null
-                          ? Image.network(associations[index].urlImage,
-                              width: 150)
-                          : Container(
-                              decoration: BoxDecoration(color: Colors.green),
-                              child: Image.asset('assets/logos/h2clogo.png'),
-                              width: 150,
-                            )),
-                      Text(associations[index].name)
-                    ],
+                  child: Container(
+                    padding: EdgeInsets.all(5) ,
+                    child: Row(
+                      children: <Widget>[
+                        (associations[index].urlImage != null
+                            ? Image.network(associations[index].urlImage,
+                            width: 150)
+                            : Container(
+                          decoration: BoxDecoration(color: Colors.green),
+                          child: Image.asset('assets/logos/h2clogo.png', fit: BoxFit.cover,),
+                          width: 150,
+                        )),
+                        Container(
+                          child: Expanded(
+                            child: Center(
+                              child: Text(
+                                associations[index].name,
+                                softWrap: true,
+                                style: TextStyle(fontSize: 12),
+                              ),
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
                   ),
                 ),
                 onTap: () => {
